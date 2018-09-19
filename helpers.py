@@ -1,3 +1,18 @@
+import math
+import numpy as np
+import torch
+
+def combine(frames): # WARNING: Normalize before inputting!
+    new_frames = []
+    for f in frames:
+        f = np.mean(f, axis=2).astype(np.uint8) # convert to grayscale
+        f = f[::2,::2] # downsample 2x
+        f = torch.as_tensor(f)
+        f = torch.reshape(f, (1,1,f.shape[1],f.shape[0]))
+        new_frames.append(f)
+    
+    return torch.cat(new_frames, dim=1) # stack along "channels"
+
 def size_after_conv(h,w, kernel_size, dilation=(1,1),stride=(1,1), padding=(0,0)):
     if type(kernel_size) == int:
         kernel_size = (kernel_size,kernel_size)

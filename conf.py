@@ -1,3 +1,10 @@
+IMAGE_WIDTH = 105
+IMAGE_HEIGHT = 80
 IMAGE_CHANNELS = 1
-OUTPUT_NUM = 8
+OUTPUT_NUM = 4
 HIDDEN_SIZE = 100
+FRAMES_PER_STATE = 2
+EPISODE_LENGTH = 1000
+
+import os
+DIR = os.path.dirname(os.path.realpath(__file__))

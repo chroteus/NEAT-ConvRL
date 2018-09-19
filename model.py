@@ -8,7 +8,7 @@ class Encoder(nn.Module):
     def __init__(self):
         nn.Module.__init__(self)
         self.conv = nn.Sequential(
-            nn.Conv2d(conf.IMAGE_CHANNELS, 32, kernel_size=(8,8), stride=(4,4)),
+            nn.Conv2d(conf.FRAMES_PER_STATE, 32, kernel_size=(8,8), stride=(4,4)),
             nn.ELU(),
 
             nn.Conv2d(32, 40, kernel_size=(4,4), stride=(2,2)),
@@ -18,10 +18,10 @@ class Encoder(nn.Module):
             nn.ELU(),
         )
 
-        flat_size = helpers.flat_size_after_conv(self.conv)
+        self.flat_size = helpers.flat_size_after_conv(self.conv, conf.IMAGE_WIDTH,conf.IMAGE_HEIGHT)
 
         self.fc = nn.Sequential(
-            nn.Linear(flat_size, 512),
+            nn.Linear(self.flat_size, 512),
             nn.ELU(),
             nn.Linear(512, conf.HIDDEN_SIZE)
         )
@@ -34,6 +34,7 @@ class Encoder(nn.Module):
 
 class InverseModel(nn.Module):
     def __init__(self, encoder):
+        nn.Module.__init__(self)
         self.encoder = encoder
 
         self.fc = nn.Sequential(
@@ -41,14 +42,14 @@ class InverseModel(nn.Module):
             nn.ELU(),
             nn.Linear(512,256),
             nn.ELU(),
-            nn.Linear(256, OUTPUT_NUM)
+            nn.Linear(256, conf.OUTPUT_NUM)
         )
 
     def forward(self, x1,x2):
         enc1 = self.encoder(x1)
         enc2 = self.encoder(x2)
 
-        enc_cat = torch.cat((enc1,enc2), dim=1)
+        enc_cat = torch.cat((enc1,enc2), dim=1) # cat along channel
         pred_action = self.fc(enc_cat)
 
         return pred_action
